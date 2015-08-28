@@ -3,20 +3,18 @@ package view.sxdxz.liao.xingyu.view;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import view.sxdxz.liao.xingyu.myapplication.R;
 
-import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static android.view.View.MeasureSpec.EXACTLY;
+import static android.view.View.MeasureSpec.makeMeasureSpec;
 
 /**
  * Created by liaoxingyu on 8/27/15.
@@ -133,6 +131,7 @@ public class TagView extends ViewGroup {
                 if (child.getVisibility() != GONE) {
                     LayoutParams layoutParams = child.getLayoutParams();
                     int marginLeft = 0, marginTop = 0, marginRight = 0, marginBottom = 0;
+                    //FIXME 让onMeasure来测量
                     if (layoutParams instanceof MarginLayoutParams) {
                         MarginLayoutParams marginLP = (MarginLayoutParams) layoutParams;
                         marginLeft = marginLP.leftMargin;
@@ -213,10 +212,10 @@ public class TagView extends ViewGroup {
         }
         Context context = getContext();
         for (String t : tags) {
-            TextView textView = new Button(context);
-            textView.setBackgroundResource(R.drawable.selector_tag_button);
+            TextView textView = new TextView(context);
+//            textView.setBackgroundResource(R.drawable.selector_tag_button);
             MarginLayoutParams lp = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-            lp.setMargins(10,10,10,10);
+            lp.setMargins(4,4,4,4);
             textView.setLayoutParams(lp);
             textView.setText(t);
             addView(textView);
@@ -229,6 +228,5 @@ public class TagView extends ViewGroup {
             View child = getChildAt(i);
             child.setOnClickListener(l);
         }
-        super.setOnClickListener(l);
     }
 }
