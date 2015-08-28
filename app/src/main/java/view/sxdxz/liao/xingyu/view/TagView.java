@@ -1,7 +1,9 @@
-package com.wegenart.bach;
+package view.sxdxz.liao.xingyu.view;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ public class TagView extends ViewGroup {
     private String mTitle;
     private TextView mTitleView;
     private boolean hasTitle;
+    private int maxHeight;
 
     public TagView(Context context) {
         super(context);
@@ -44,25 +47,29 @@ public class TagView extends ViewGroup {
         int childCount = getChildCount();
         if (childCount != 0) {
             int cellCount = getCellCount(childCount);
-            int childHeightSpec;
+            int childHeight;
             if (cellCount != 0) {
                 int lineColumn = getLineColumn(cellCount);
 
                 int childWidth = width / lineColumn;
-                int childHeight = getCellHeight(height, lineColumn, cellCount);
-
-                int childWidthSpec = makeMeasureSpec(childWidth, EXACTLY);
-                childHeightSpec = makeMeasureSpec(childHeight, EXACTLY);
+                childHeight = getCellHeight(height, lineColumn, cellCount);
+                if (childHeight > maxHeight) {
+                    childHeight = maxHeight;
+                }
+                int childWidthSpec = makeMeasureSpec(childWidth, MeasureSpec.AT_MOST);
+                int childHeightSpec = makeMeasureSpec(childHeight, MeasureSpec.AT_MOST);
                 for (int i = hasTitle ? 1 : 0; i < childCount; i++) {
-                    View child = getChildAt(i);
+                    TextView child = (TextView) getChildAt(i);
                     child.measure(childWidthSpec, childHeightSpec);
+                    //because of AT_MOST, we must reset TextView's gravity
+                    child.setGravity(Gravity.CENTER);
                 }
             } else {
-                childHeightSpec = heightMeasureSpec;
+                childHeight = height > maxHeight ? maxHeight : height;
             }
             if (hasTitle) {
-                View title = getChildAt(0);
-                title.measure(makeMeasureSpec(width, EXACTLY), childHeightSpec);
+                TextView title = (TextView) getChildAt(0);
+                title.measure(makeMeasureSpec(width, MeasureSpec.EXACTLY), makeMeasureSpec(childHeight, EXACTLY));
             }
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -112,6 +119,9 @@ public class TagView extends ViewGroup {
 
             int childWidth = width / lineColumn;
             childHeight = getCellHeight(height, lineColumn, cellCount);
+            if (childHeight > maxHeight) {
+                childHeight = maxHeight;
+            }
 
             for (int i = hasTitle ? 1 : 0, row = hasTitle ? 1 : 0; i < childCount; i++) {
                 View child = getChildAt(i);
@@ -141,6 +151,8 @@ public class TagView extends ViewGroup {
     }
 
     private void init() {
+        Resources resources = getResources();
+        maxHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, resources.getDisplayMetrics());
         if (isInEditMode()) {
             setTitle("title");
             String[] tags = new String[]{"tag0", "tag1", "tag2", "tag3", "tag four", "tag five", "tag six"};
@@ -152,7 +164,10 @@ public class TagView extends ViewGroup {
         mTitle = title;
         TextView titleView = new TextView(getContext());
         titleView.setText(title);
-        titleView.setGravity(Gravity.CENTER);
+        titleView.setGravity(Gravity.CENTER_VERTICAL);
+        int paddingSmall
+                = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+        titleView.setPadding(paddingSmall, 0, 0, 0);
         addView(titleView, 0);
         hasTitle = true;
     }
@@ -164,7 +179,6 @@ public class TagView extends ViewGroup {
         Context context = getContext();
         for (String t : tags) {
             TextView textView = new TextView(context);
-            textView.setGravity(Gravity.CENTER);
             textView.setText(t);
             addView(textView);
         }
