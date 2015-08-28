@@ -160,6 +160,10 @@ public class TagView extends ViewGroup {
         }
     }
 
+    public void setMaxLineColumn(int column) {
+        mMaxLineColumn = column;
+    }
+
     public void setTitle(String title) {
         mTitle = title;
         TextView titleView = new TextView(getContext());
