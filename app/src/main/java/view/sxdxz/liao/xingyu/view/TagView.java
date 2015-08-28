@@ -1,4 +1,4 @@
-package view.sxdxz.liao.xingyu.view;
+package com.wegenart.bach;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -44,16 +44,21 @@ public class TagView extends ViewGroup {
         int childCount = getChildCount();
         if (childCount != 0) {
             int cellCount = getCellCount(childCount);
-            int lineColumn = getLineColumn(cellCount);
+            int childHeightSpec;
+            if (cellCount != 0) {
+                int lineColumn = getLineColumn(cellCount);
 
-            int childWidth = width / lineColumn;
-            int childHeight = getCellHeight(height, lineColumn, cellCount);
+                int childWidth = width / lineColumn;
+                int childHeight = getCellHeight(height, lineColumn, cellCount);
 
-            int childWidthSpec = makeMeasureSpec(childWidth, EXACTLY);
-            int childHeightSpec = makeMeasureSpec(childHeight, EXACTLY);
-            for (int i = hasTitle ? 1 : 0; i < childCount; i++) {
-                View child = getChildAt(i);
-                child.measure(childWidthSpec, childHeightSpec);
+                int childWidthSpec = makeMeasureSpec(childWidth, EXACTLY);
+                childHeightSpec = makeMeasureSpec(childHeight, EXACTLY);
+                for (int i = hasTitle ? 1 : 0; i < childCount; i++) {
+                    View child = getChildAt(i);
+                    child.measure(childWidthSpec, childHeightSpec);
+                }
+            } else {
+                childHeightSpec = heightMeasureSpec;
             }
             if (hasTitle) {
                 View title = getChildAt(0);
@@ -61,7 +66,6 @@ public class TagView extends ViewGroup {
             }
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//        setMeasuredDimension(width + getPaddingLeft() + getPaddingRight(), height + getPaddingTop() + getPaddingBottom());
     }
 
     private int getLineColumn(int cellCount) {
@@ -102,28 +106,33 @@ public class TagView extends ViewGroup {
         int height = b - t - paddingTop - paddingBottom;
 
         int cellCount = getCellCount(childCount);
-        int lineColumn = getLineColumn(cellCount);
+        int childHeight;
+        if (cellCount != 0) {
+            int lineColumn = getLineColumn(cellCount);
 
-        int childWidth = width / lineColumn;
-        int childHeight = getCellHeight(height, lineColumn, cellCount);
+            int childWidth = width / lineColumn;
+            childHeight = getCellHeight(height, lineColumn, cellCount);
 
-        for (int i = hasTitle ? 1 : 0, row = hasTitle ? 1 : 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            int childIndex = i;
-            if (hasTitle) {
-                childIndex--;
+            for (int i = hasTitle ? 1 : 0, row = hasTitle ? 1 : 0; i < childCount; i++) {
+                View child = getChildAt(i);
+                int childIndex = i;
+                if (hasTitle) {
+                    childIndex--;
+                }
+                int col = childIndex % lineColumn;
+                if (col == 0 && childIndex != 0) {
+                    row++;
+                }
+
+                int left = col * childWidth + paddingLeft;
+                int right = left + childWidth;
+                int top = row * childHeight + paddingTop;
+                int bottom = top + childHeight;
+
+                child.layout(left, top, right, bottom);
             }
-            int col = childIndex % lineColumn;
-            if (col == 0 && childIndex != 0) {
-                row++;
-            }
-
-            int left = col * childWidth + paddingLeft;
-            int right = left + childWidth;
-            int top = row * childHeight + paddingTop;
-            int bottom = top + childHeight;
-
-            child.layout(left, top, right, bottom);
+        } else {
+            childHeight = height;
         }
         if (hasTitle) {
             View title = getChildAt(0);
