@@ -4,16 +4,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import view.sxdxz.liao.xingyu.myapplication.R;
-
-import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 
 /**
@@ -52,13 +48,11 @@ public class TagView extends ViewGroup {
             if (childHeight > maxHeight) {
                 childHeight = maxHeight;
             }
-            int childWidthSpec = makeMeasureSpec(childWidth, MeasureSpec.AT_MOST);
-            int childHeightSpec = makeMeasureSpec(childHeight, MeasureSpec.AT_MOST);
+            int childWidthSpec = makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
+            int childHeightSpec = makeMeasureSpec(childHeight, MeasureSpec.EXACTLY);
             for (int i = 0; i < childCount; i++) {
                 TextView child = (TextView) getChildAt(i);
                 child.measure(childWidthSpec, childHeightSpec);
-                //because of AT_MOST, we must reset TextView's gravity
-                child.setGravity(Gravity.CENTER);
             }
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -84,49 +78,38 @@ public class TagView extends ViewGroup {
         }
 
         int paddingLeft = getPaddingLeft();
-        int paddingRight = getPaddingRight();
         int paddingTop = getPaddingTop();
-        int paddingBottom = getPaddingBottom();
 
-        int width = r - l - paddingLeft - paddingRight;
-        int height = b - t - paddingTop - paddingBottom;
+        int lineColumn = getLineColumn(childCount);
 
-        int childHeight;
-            int lineColumn = getLineColumn(childCount);
-
-            int childWidth = width / lineColumn;
-            childHeight = getCellHeight(height, lineColumn, childCount);
-            if (childHeight > maxHeight) {
-                childHeight = maxHeight;
-            }
-
-            for (int i = 0, row = 0; i < childCount; i++) {
-                View child = getChildAt(i);
-                if (child.getVisibility() != GONE) {
-                    LayoutParams layoutParams = child.getLayoutParams();
-                    int marginLeft = 0, marginTop = 0, marginRight = 0, marginBottom = 0;
-                    //FIXME 让onMeasure来测量
-                    if (layoutParams instanceof MarginLayoutParams) {
-                        MarginLayoutParams marginLP = (MarginLayoutParams) layoutParams;
-                        marginLeft = marginLP.leftMargin;
-                        marginTop = marginLP.topMargin;
-                        marginRight = marginLP.rightMargin;
-                        marginBottom = marginLP.bottomMargin;
-                    }
-
-                    int childIndex = i;
-                    int col = childIndex % lineColumn;
-                    if (col == 0 && childIndex != 0) {
-                        row++;
-                    }
-
-                    int left = col * childWidth + paddingLeft + marginLeft;
-                    int right = left + childWidth - marginLeft - marginRight;
-                    int top = row * childHeight + paddingTop + marginTop;
-                    int bottom = top + childHeight - marginTop - marginBottom;
-
-                    child.layout(left, top, right, bottom);
+        for (int i = 0, row = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != GONE) {
+                LayoutParams layoutParams = child.getLayoutParams();
+                int marginLeft = 0, marginTop = 0, marginRight = 0, marginBottom = 0;
+                //FIXME 让onMeasure来测量
+                if (layoutParams instanceof MarginLayoutParams) {
+                    MarginLayoutParams marginLP = (MarginLayoutParams) layoutParams;
+                    marginLeft = marginLP.leftMargin;
+                    marginTop = marginLP.topMargin;
+                    marginRight = marginLP.rightMargin;
+                    marginBottom = marginLP.bottomMargin;
                 }
+
+                int childHeight = child.getMeasuredHeight();
+                int childWidth = child.getMeasuredWidth();
+                int col = i % lineColumn;
+                if (col == 0 && i != 0) {
+                    row++;
+                }
+
+                int left = col * childWidth + paddingLeft + marginLeft;
+                int right = left + childWidth - marginLeft - marginRight;
+                int top = row * childHeight + paddingTop + marginTop;
+                int bottom = top + childHeight - marginTop - marginBottom;
+
+                child.layout(left, top, right, bottom);
+            }
         }
     }
 
@@ -142,20 +125,6 @@ public class TagView extends ViewGroup {
     public void setMaxLineColumn(int column) {
         mMaxLineColumn = column;
     }
-
-//    public void setTitle(String title) {
-//        mTitle = title;
-//        TextView titleView = new TextView(getContext());
-//        titleView.setText(title);
-//        titleView.setGravity(Gravity.CENTER_VERTICAL);
-//        Resources res = getResources();
-//        int paddingSmall
-//                = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, res.getDisplayMetrics());
-//        titleView.setPadding(paddingSmall, 0, 0, 0);
-//        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-//        addView(titleView, 0);
-//        hasTitle = true;
-//    }
 
     public void setTags(String[] tags) {
         if (tags == null) {
