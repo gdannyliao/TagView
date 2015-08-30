@@ -21,9 +21,6 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
  */
 public class TagView extends ViewGroup {
     private int mMaxLineColumn = 5;
-    private String mTitle;
-    private TextView mTitleView;
-    private boolean hasTitle;
     private int maxHeight;
 
     public TagView(Context context) {
@@ -48,30 +45,20 @@ public class TagView extends ViewGroup {
 
         int childCount = getChildCount();
         if (childCount != 0) {
-            int cellCount = getCellCount(childCount);
-            int childHeight;
-            if (cellCount != 0) {
-                int lineColumn = getLineColumn(cellCount);
+            int lineColumn = getLineColumn(childCount);
 
-                int childWidth = width / lineColumn;
-                childHeight = getCellHeight(height, lineColumn, cellCount);
-                if (childHeight > maxHeight) {
-                    childHeight = maxHeight;
-                }
-                int childWidthSpec = makeMeasureSpec(childWidth, MeasureSpec.AT_MOST);
-                int childHeightSpec = makeMeasureSpec(childHeight, MeasureSpec.AT_MOST);
-                for (int i = hasTitle ? 1 : 0; i < childCount; i++) {
-                    TextView child = (TextView) getChildAt(i);
-                    child.measure(childWidthSpec, childHeightSpec);
-                    //because of AT_MOST, we must reset TextView's gravity
-                    child.setGravity(Gravity.CENTER);
-                }
-            } else {
-                childHeight = height > maxHeight ? maxHeight : height;
+            int childWidth = width / lineColumn;
+            int childHeight = getCellHeight(height, lineColumn, childCount);
+            if (childHeight > maxHeight) {
+                childHeight = maxHeight;
             }
-            if (hasTitle) {
-                TextView title = (TextView) getChildAt(0);
-                title.measure(makeMeasureSpec(width, MeasureSpec.EXACTLY), makeMeasureSpec(childHeight, EXACTLY));
+            int childWidthSpec = makeMeasureSpec(childWidth, MeasureSpec.AT_MOST);
+            int childHeightSpec = makeMeasureSpec(childHeight, MeasureSpec.AT_MOST);
+            for (int i = 0; i < childCount; i++) {
+                TextView child = (TextView) getChildAt(i);
+                child.measure(childWidthSpec, childHeightSpec);
+                //because of AT_MOST, we must reset TextView's gravity
+                child.setGravity(Gravity.CENTER);
             }
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -84,19 +71,8 @@ public class TagView extends ViewGroup {
         return lineColumn;
     }
 
-    private int getCellCount(int childCount) {
-        int cellCount = childCount;
-        if (hasTitle) {
-            cellCount--;
-        }
-        return cellCount;
-    }
-
     private int getCellHeight(int layoutHeight, int lineColumn, int cellCount) {
         double rowCount = Math.ceil((double) cellCount / lineColumn);
-        if (hasTitle) {
-            rowCount++;
-        }
         return (int) (layoutHeight / rowCount);
     }
 
@@ -115,18 +91,16 @@ public class TagView extends ViewGroup {
         int width = r - l - paddingLeft - paddingRight;
         int height = b - t - paddingTop - paddingBottom;
 
-        int cellCount = getCellCount(childCount);
         int childHeight;
-        if (cellCount != 0) {
-            int lineColumn = getLineColumn(cellCount);
+            int lineColumn = getLineColumn(childCount);
 
             int childWidth = width / lineColumn;
-            childHeight = getCellHeight(height, lineColumn, cellCount);
+            childHeight = getCellHeight(height, lineColumn, childCount);
             if (childHeight > maxHeight) {
                 childHeight = maxHeight;
             }
 
-            for (int i = hasTitle ? 1 : 0, row = hasTitle ? 1 : 0; i < childCount; i++) {
+            for (int i = 0, row = 0; i < childCount; i++) {
                 View child = getChildAt(i);
                 if (child.getVisibility() != GONE) {
                     LayoutParams layoutParams = child.getLayoutParams();
@@ -141,9 +115,6 @@ public class TagView extends ViewGroup {
                     }
 
                     int childIndex = i;
-                    if (hasTitle) {
-                        childIndex--;
-                    }
                     int col = childIndex % lineColumn;
                     if (col == 0 && childIndex != 0) {
                         row++;
@@ -156,13 +127,6 @@ public class TagView extends ViewGroup {
 
                     child.layout(left, top, right, bottom);
                 }
-            }
-        } else {
-            childHeight = height;
-        }
-        if (hasTitle) {
-            View title = getChildAt(0);
-            title.layout(paddingLeft, paddingTop, paddingLeft + width, paddingTop + childHeight);
         }
     }
 
@@ -170,7 +134,6 @@ public class TagView extends ViewGroup {
         Resources resources = getResources();
         maxHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, resources.getDisplayMetrics());
         if (isInEditMode()) {
-            setTitle("title");
             String[] tags = new String[]{"tag0", "tag1", "tag2", "tag3", "tag four", "tag five", "tag six"};
             setTags(tags);
         }
@@ -180,19 +143,19 @@ public class TagView extends ViewGroup {
         mMaxLineColumn = column;
     }
 
-    public void setTitle(String title) {
-        mTitle = title;
-        TextView titleView = new TextView(getContext());
-        titleView.setText(title);
-        titleView.setGravity(Gravity.CENTER_VERTICAL);
-        Resources res = getResources();
-        int paddingSmall
-                = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, res.getDisplayMetrics());
-        titleView.setPadding(paddingSmall, 0, 0, 0);
-        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-        addView(titleView, 0);
-        hasTitle = true;
-    }
+//    public void setTitle(String title) {
+//        mTitle = title;
+//        TextView titleView = new TextView(getContext());
+//        titleView.setText(title);
+//        titleView.setGravity(Gravity.CENTER_VERTICAL);
+//        Resources res = getResources();
+//        int paddingSmall
+//                = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, res.getDisplayMetrics());
+//        titleView.setPadding(paddingSmall, 0, 0, 0);
+//        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+//        addView(titleView, 0);
+//        hasTitle = true;
+//    }
 
     public void setTags(String[] tags) {
         if (tags == null) {
@@ -215,7 +178,7 @@ public class TagView extends ViewGroup {
             TextView textView = new TextView(context);
 //            textView.setBackgroundResource(R.drawable.selector_tag_button);
             MarginLayoutParams lp = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-            lp.setMargins(4,4,4,4);
+            lp.setMargins(4, 4, 4, 4);
             textView.setLayoutParams(lp);
             textView.setText(t);
             addView(textView);
@@ -224,7 +187,7 @@ public class TagView extends ViewGroup {
 
     @Override
     public void setOnClickListener(OnClickListener l) {
-        for (int i = hasTitle ? 1 : 0, count = getChildCount(); i < count; i++) {
+        for (int i = 0, count = getChildCount(); i < count; i++) {
             View child = getChildAt(i);
             child.setOnClickListener(l);
         }
