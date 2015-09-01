@@ -14,6 +14,7 @@ import static android.view.View.MeasureSpec.makeMeasureSpec;
 
 /**
  * Created by liaoxingyu on 8/27/15.
+ * kiss me , bb.
  */
 public class TagView extends ViewGroup {
     private int mMaxLineColumn = 5;
