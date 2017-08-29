@@ -16,7 +16,7 @@ import java.util.*
 class TagView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr) {
-    private var mMaxLineColumn = 5
+    private var maxLineColumn = 5
     private var maxHeight: Int = 0
 
     init {
@@ -28,6 +28,11 @@ class TagView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        fun getCellHeight(layoutHeight: Int, lineColumn: Int, cellCount: Int): Int {
+            val rowCount = Math.ceil(cellCount.toDouble() / lineColumn)
+            return (layoutHeight / rowCount).toInt()
+        }
+
         val width = View.MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
         val height = View.MeasureSpec.getSize(heightMeasureSpec) - paddingTop - paddingBottom
 
@@ -51,14 +56,9 @@ class TagView @JvmOverloads constructor(
 
     private fun getLineColumn(cellCount: Int): Int {
         var lineColumn = cellCount
-        if (lineColumn >= mMaxLineColumn)
-            lineColumn = mMaxLineColumn
+        if (lineColumn >= maxLineColumn)
+            lineColumn = maxLineColumn
         return lineColumn
-    }
-
-    private fun getCellHeight(layoutHeight: Int, lineColumn: Int, cellCount: Int): Int {
-        val rowCount = Math.ceil(cellCount.toDouble() / lineColumn)
-        return (layoutHeight / rowCount).toInt()
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -101,7 +101,7 @@ class TagView @JvmOverloads constructor(
     }
 
     fun setMaxLineColumn(column: Int) {
-        mMaxLineColumn = column
+        maxLineColumn = column
     }
 
     fun setTags(tags: Array<String>) {
@@ -115,7 +115,6 @@ class TagView @JvmOverloads constructor(
     fun setTags(tags: ArrayList<String>) {
         for (t in tags) {
             val textView = TextView(context)
-            //            textView.setBackgroundResource(R.drawable.selector_tag_button);
             val lp = ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             lp.setMargins(4, 4, 4, 4)
             textView.layoutParams = lp
