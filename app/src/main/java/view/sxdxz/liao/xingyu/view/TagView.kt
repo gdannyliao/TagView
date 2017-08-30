@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
-import android.view.View.MeasureSpec.makeMeasureSpec
 import android.view.ViewGroup
 import android.widget.TextView
 import java.util.*
@@ -18,6 +17,16 @@ class TagView @JvmOverloads constructor(
 ) : ViewGroup(context, attrs, defStyleAttr) {
     private var maxLineColumn = 5
     private var maxHeight: Int = 0
+    private val layoutCaches = mutableMapOf<View, LayoutPosition>()
+
+    private class LayoutPosition(val view: View) {
+        var left = 0
+        var right = 0
+        var top = 0
+        var bottom = 0
+        override fun toString(): String =
+                "LayoutPosition(view=${if (view is TextView) view.text else view}, left=$left, right=$right, top=$top, bottom=$bottom)"
+    }
 
     init {
         maxHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics).toInt()
@@ -28,77 +37,103 @@ class TagView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        fun getCellHeight(layoutHeight: Int, lineColumn: Int, cellCount: Int): Int {
-            val rowCount = Math.ceil(cellCount.toDouble() / lineColumn)
-            return (layoutHeight / rowCount).toInt()
-        }
+        val width = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
+        val height = MeasureSpec.getSize(heightMeasureSpec) - paddingTop - paddingBottom
 
-        val width = View.MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
-        val height = View.MeasureSpec.getSize(heightMeasureSpec) - paddingTop - paddingBottom
+        //单行累积总宽，即最宽元素的宽
+        var usedWidth = 0
+        //单行累积总高，即最高元素的高
+        var usedHeight = 0
+        //容器整体宽度
+        var containerWidth = 0
+        var containerHeight = 0
+        var lineTop = 0
+        var row = 0
+        var col = 0
 
-        val childCount = childCount
-        if (childCount != 0) {
-            val lineColumn = getLineColumn(childCount)
+        fun hasEnoughSpace(childWidth: Int): Boolean = width - usedWidth >= childWidth
 
-            val childWidth = width / lineColumn
-            var childHeight = getCellHeight(height, lineColumn, childCount)
-            if (childHeight > maxHeight) {
-                childHeight = maxHeight
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            if (child.visibility == View.GONE) continue
+            //假设父布局有足够的空间让子view放置
+            measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0)
+            val lp = child.layoutParams as MarginLayoutParams
+            val childWidth = child.measuredWidth + lp.leftMargin + lp.rightMargin
+            val childHeight = child.measuredHeight + lp.topMargin + lp.bottomMargin
+
+            var layoutCache = layoutCaches[child]
+            if (layoutCache == null) {
+                layoutCache = LayoutPosition(child)
+                layoutCaches.put(child, layoutCache)
             }
-            val childWidthSpec = makeMeasureSpec(childWidth, View.MeasureSpec.EXACTLY)
-            val childHeightSpec = makeMeasureSpec(childHeight, View.MeasureSpec.EXACTLY)
-            (0 until childCount)
-                    .map { getChildAt(it) as TextView }
-                    .forEach { it.measure(childWidthSpec, childHeightSpec) }
-        }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-    }
 
-    private fun getLineColumn(cellCount: Int): Int {
-        var lineColumn = cellCount
-        if (lineColumn >= maxLineColumn)
-            lineColumn = maxLineColumn
-        return lineColumn
+            if (hasEnoughSpace(childWidth) && col < maxLineColumn) {
+                layoutCache.left = usedWidth
+                layoutCache.top = lineTop
+                layoutCache.right = layoutCache.left + childWidth
+                layoutCache.bottom = layoutCache.top + childHeight
+
+                usedWidth += childWidth
+                col++
+                if (childHeight > usedHeight) usedHeight = childHeight
+                if (usedWidth > containerWidth) containerWidth = usedWidth
+            } else {
+                col = 0
+                row++
+                usedWidth = 0
+                containerHeight += usedHeight
+                lineTop = containerHeight
+
+                layoutCache.left = usedWidth
+                layoutCache.top = lineTop
+                layoutCache.right = layoutCache.left + childWidth
+                layoutCache.bottom = layoutCache.top + childHeight
+
+                usedWidth = childWidth
+                usedHeight = childHeight
+                println("next line")
+            }
+            println("usedWidth=$usedWidth, usedHeight=$usedHeight")
+
+            if (child is TextView)
+                println("v=$this,c=$layoutCache")
+        }
+        containerHeight += usedHeight
+
+        val wMode = MeasureSpec.getMode(widthMeasureSpec)
+        val hMode = MeasureSpec.getMode(heightMeasureSpec)
+
+        var finalWidth = width
+        var finalHeight = height
+        if (layoutParams.width != LayoutParams.MATCH_PARENT) {
+            finalWidth = containerWidth
+        }
+        if (layoutParams.height != LayoutParams.MATCH_PARENT) {
+            finalHeight = containerHeight
+        }
+        setMeasuredDimension(finalWidth, finalHeight)
+        println("end measure w=$width, h=$height, wm=${Utils.toMeasureModeName(wMode)}, hm=${Utils.toMeasureModeName(hMode)}")
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        if (childCount == 0) return
-
-        val lineColumn = getLineColumn(childCount)
-
-        var i = 0
-        var row = 0
-        while (i < childCount) {
+        for (i in 0 until childCount) {
             val child = getChildAt(i)
-            if (child.visibility != View.GONE) {
-                val layoutParams = child.layoutParams
-                var marginLeft = 0
-                var marginTop = 0
-                var marginRight = 0
-                var marginBottom = 0
-
-                if (layoutParams is ViewGroup.MarginLayoutParams) {
-                    marginLeft = layoutParams.leftMargin
-                    marginTop = layoutParams.topMargin
-                    marginRight = layoutParams.rightMargin
-                    marginBottom = layoutParams.bottomMargin
-                }
-
-                val childHeight = child.measuredHeight
-                val childWidth = child.measuredWidth
-                val col = i % lineColumn
-                if (col == 0 && i != 0) row++
-
-                val left = col * childWidth + paddingLeft + marginLeft
-                val right = left + childWidth - marginLeft - marginRight
-                val top = row * childHeight + paddingTop + marginTop
-                val bottom = top + childHeight - marginTop - marginBottom
-
-                child.layout(left, top, right, bottom)
-            }
-            i++
+            if (child.visibility == View.GONE) continue
+            val layoutPosition = layoutCaches[child] ?: continue
+            child.layout(layoutPosition.left, layoutPosition.top
+                    , layoutPosition.right, layoutPosition.bottom)
         }
     }
+
+    override fun generateDefaultLayoutParams(): LayoutParams =
+            MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+
+    override fun generateLayoutParams(attrs: AttributeSet?): LayoutParams =
+            MarginLayoutParams(context, attrs)
+
+    override fun generateLayoutParams(p: LayoutParams?): LayoutParams =
+            MarginLayoutParams(p)
 
     fun setMaxLineColumn(column: Int) {
         maxLineColumn = column
@@ -131,5 +166,13 @@ class TagView @JvmOverloads constructor(
             child.setOnClickListener(l)
             i++
         }
+    }
+}
+
+object Utils {
+    fun toMeasureModeName(mode: Int): String = when (mode) {
+        View.MeasureSpec.EXACTLY -> "EXACTLY"
+        View.MeasureSpec.AT_MOST -> "AT_MOST"
+        else -> "UNSPECIFIED"
     }
 }

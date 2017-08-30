@@ -32,6 +32,5 @@ class MainActivityFragment : Fragment() {
             child.text = "test$i"
             layout.addView(child)
         }
-
     }
 }
