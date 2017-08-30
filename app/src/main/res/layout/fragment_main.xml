@@ -12,8 +12,90 @@
 		android:layout_alignParentTop="true"
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
-		/>
+		>
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="wrapContent"
+			android:background="#aaFF338B"
+			/>
+		<TextView
+			android:layout_width="120dp"
+			android:layout_height="120dp"
+			android:background="#aa7DE285"
+			android:text="fix size"
+			/>
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="80dp"
+			android:background="#aaff338b"
+			android:text="fix size2"
+			/>
+		<TextView
+			android:layout_width="20dp"
+			android:layout_height="60dp"
+			android:text="fix size3"
+			android:background="#aa7de285"
+			/>
+		<TextView
+			android:layout_width="30dp"
+			android:layout_height="wrap_content"
+			android:text="fifth"
+			android:background="#aaFF338B"
+			/>
+		<TextView
+			android:layout_width="14dp"
+			android:layout_height="wrap_content"
+			android:text="超出最大列数"
+			android:background="#aa3393FF"
+			/>
+		<view.sxdxz.liao.xingyu.view.LogTextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="matchParent"
+			android:background="#aa3393FF"
+			/>
 
+
+	</view.sxdxz.liao.xingyu.view.TagView>
+
+	<view.sxdxz.liao.xingyu.view.TagView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/tagView"
+		>
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="wrapContent"
+			android:background="#aaFF338B"
+			/>
+		<TextView
+			android:layout_width="120dp"
+			android:layout_height="120dp"
+			android:background="#aa7DE285"
+			android:text="fix size"
+			/>
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="80dp"
+			android:background="#aaff338b"
+			android:text="fix size2"
+			/>
+		<TextView
+			android:layout_width="0dp"
+			android:layout_height="60dp"
+			android:text="match left space"
+			android:background="#aa7de285"
+			/>
+		<view.sxdxz.liao.xingyu.view.LogTextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="matchParent"
+			android:background="#aa3393FF"
+			android:minWidth="64dp"
+			/>
+	</view.sxdxz.liao.xingyu.view.TagView>
 	<!--<view.sxdxz.liao.xingyu.view.TagView-->
 		<!--android:layout_width="250dp"-->
 		<!--android:layout_height="100dp"-->

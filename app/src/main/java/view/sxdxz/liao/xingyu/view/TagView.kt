@@ -9,8 +9,15 @@ import android.widget.TextView
 import java.util.*
 
 /**
+ *  TagView是一个布局。它的孩子会随着添加顺序从左到右，从上到下依次排列。它的排列方式遵循以下原则
+ *  1.当横向的空间足够放入一个孩子时，这个孩子总是会排在现有的孩子右边
+ *  2.当横向的空间不足以放入一个孩子时，这个孩子会在下一行排列
+ *  3.每行的行高取决于这一行里面最高的孩子
+ *  4.当布局的宽度为wrap_content时，每行的长度等于这一行所有孩子的宽度的和
+ *
+ *  可以使用@param setLineMaxColumn() 来设置一行最多有多少列。默认最多5列
+ *  当一个元素是改行最后的元素时，可以使用0dp来设置该元素占用剩余空间
  * Created by liaoxingyu on 8/27/15.
- * kiss me , bb.
  */
 class TagView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -30,7 +37,10 @@ class TagView @JvmOverloads constructor(
 
     init {
         maxHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics).toInt()
-        if (isInEditMode) {
+    }
+
+    override fun onFinishInflate() {
+        if (isInEditMode && childCount == 0) {
             val tags = arrayOf("tag0", "tag1", "tag2", "tag3", "tag four", "tag five", "tag six")
             setTags(tags)
         }
@@ -57,7 +67,10 @@ class TagView @JvmOverloads constructor(
             val child = getChildAt(i)
             if (child.visibility == View.GONE) continue
             //假设父布局有足够的空间让子view放置
-            measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0)
+            if (child.layoutParams.width == 0) {
+                child.layoutParams.width = width - usedWidth
+                measureChildWithMargins(child, widthMeasureSpec, usedWidth, heightMeasureSpec, 0)
+            } else measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0)
             val lp = child.layoutParams as MarginLayoutParams
             val childWidth = child.measuredWidth + lp.leftMargin + lp.rightMargin
             val childHeight = child.measuredHeight + lp.topMargin + lp.bottomMargin
@@ -96,8 +109,7 @@ class TagView @JvmOverloads constructor(
             }
             println("usedWidth=$usedWidth, usedHeight=$usedHeight")
 
-            if (child is TextView)
-                println("v=$this,c=$layoutCache")
+            println("v=${if (child is TextView) child.text else child},c=$layoutCache")
         }
         containerHeight += usedHeight
 
@@ -135,7 +147,7 @@ class TagView @JvmOverloads constructor(
     override fun generateLayoutParams(p: LayoutParams?): LayoutParams =
             MarginLayoutParams(p)
 
-    fun setMaxLineColumn(column: Int) {
+    fun setLineMaxColumn(column: Int) {
         maxLineColumn = column
     }
 
@@ -174,5 +186,18 @@ object Utils {
         View.MeasureSpec.EXACTLY -> "EXACTLY"
         View.MeasureSpec.AT_MOST -> "AT_MOST"
         else -> "UNSPECIFIED"
+    }
+}
+
+class LogTextView @JvmOverloads constructor(
+        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : TextView(context, attrs, defStyleAttr) {
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val w = MeasureSpec.getSize(widthMeasureSpec)
+        val wm = MeasureSpec.getMode(widthMeasureSpec)
+        val h = MeasureSpec.getSize(heightMeasureSpec)
+        val hm = MeasureSpec.getMode(heightMeasureSpec)
+        println("w=$w wm=${Utils.toMeasureModeName(wm)} h=$h hm=${Utils.toMeasureModeName(hm)}")
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 }
