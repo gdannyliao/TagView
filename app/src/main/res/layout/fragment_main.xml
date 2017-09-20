@@ -5,7 +5,7 @@
 	tools:context=".MainActivityFragment"
 	>
 
-	<view.sxdxz.liao.xingyu.view.TagView
+	<view.sxdxz.liao.xingyu.view.TagLayout
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:id="@+id/tagView"
@@ -57,9 +57,9 @@
 			/>
 
 
-	</view.sxdxz.liao.xingyu.view.TagView>
+	</view.sxdxz.liao.xingyu.view.TagLayout>
 
-	<view.sxdxz.liao.xingyu.view.TagView
+	<view.sxdxz.liao.xingyu.view.TagLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/tagView"
@@ -74,13 +74,15 @@
 			android:layout_width="120dp"
 			android:layout_height="120dp"
 			android:background="#aa7DE285"
-			android:text="fix size"
+			android:text="fixSizeWzMargin"
+			android:layout_margin="8dp"
 			/>
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="80dp"
 			android:background="#aaff338b"
-			android:text="fix size2"
+			android:text="fixSizeWzMargin"
+			android:layout_margin="8dp"
 			/>
 		<TextView
 			android:layout_width="0dp"
@@ -95,8 +97,8 @@
 			android:background="#aa3393FF"
 			android:minWidth="64dp"
 			/>
-	</view.sxdxz.liao.xingyu.view.TagView>
-	<!--<view.sxdxz.liao.xingyu.view.TagView-->
+	</view.sxdxz.liao.xingyu.view.TagLayout>
+	<!--<view.sxdxz.liao.xingyu.view.TagLayoutut-->
 		<!--android:layout_width="250dp"-->
 		<!--android:layout_height="100dp"-->
 		<!--android:layout_below="@+id/tagView"-->
@@ -106,5 +108,5 @@
 			<!--android:layout_height="wrap_content"-->
 			<!--android:text="test1"-->
 			<!--/>-->
-	<!--</view.sxdxz.liao.xingyu.view.TagView>-->
+	<!--</view.sxdxz.liao.xingyu.view.TagLayoutut>-->
 </RelativeLayout>
