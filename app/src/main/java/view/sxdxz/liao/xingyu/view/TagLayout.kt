@@ -2,7 +2,6 @@ package view.sxdxz.liao.xingyu.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -132,7 +131,6 @@ class TagLayout @JvmOverloads constructor(
                 }
             }
         }
-//TODO 17.9.21 如果height 小于containerHeight，即该类可使用的最大高小于该类的子类所需要的高，那应该通知子类做调整
         //FIXME 最后一个元素的matchParent在linearLayout无效，measureChildWithMargins得出的值是wrap content的值
         setMeasuredDimension(finalWidth, finalHeight)
         println("end measure lpw=${myLp.width} lph=${myLp.height} maxH=$height ctnH=$containerHeight w=$width, h=$height, wm=${Utils.toMeasureModeName(wMode)}, hm=${Utils.toMeasureModeName(hMode)}")
@@ -143,6 +141,8 @@ class TagLayout @JvmOverloads constructor(
             val child = getChildAt(i)
             if (child.visibility == View.GONE) continue
             val layoutPosition = childPositions[child] ?: continue
+            //TODO 17.9.21 如果height 小于containerHeight，即该类可使用的最大高小于该类的子类所需要的高，那应该通知子类做调整。目前直接不显示该子类
+            if (layoutPosition.bottom > measuredHeight) continue
             child.layout(layoutPosition.left, layoutPosition.top
                     , layoutPosition.right, layoutPosition.bottom)
         }
