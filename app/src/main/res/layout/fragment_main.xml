@@ -1,7 +1,8 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	android:orientation="vertical"
 	tools:context=".MainActivityFragment"
 	>
 
@@ -55,14 +56,11 @@
 			android:text="matchParent"
 			android:background="#aa3393FF"
 			/>
-
-
 	</view.sxdxz.liao.xingyu.view.TagLayout>
 
 	<view.sxdxz.liao.xingyu.view.TagLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/tagView"
+		android:layout_height="150dp"
 		>
 		<TextView
 			android:layout_width="wrap_content"
@@ -92,13 +90,13 @@
 			/>
 		<view.sxdxz.liao.xingyu.view.LogTextView
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
+			android:layout_height="100dp"
 			android:text="matchParent"
 			android:background="#aa3393FF"
 			android:minWidth="64dp"
 			/>
 	</view.sxdxz.liao.xingyu.view.TagLayout>
-	<!--<view.sxdxz.liao.xingyu.view.TagLayoutut-->
+	<!--<view.sxdxz.liao.xingyu.view.TagLayout-->
 		<!--android:layout_width="250dp"-->
 		<!--android:layout_height="100dp"-->
 		<!--android:layout_below="@+id/tagView"-->
@@ -109,4 +107,4 @@
 			<!--android:text="test1"-->
 			<!--/>-->
 	<!--</view.sxdxz.liao.xingyu.view.TagLayoutut>-->
-</RelativeLayout>
+</LinearLayout>

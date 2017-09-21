@@ -22,7 +22,6 @@ class TagLayout @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr) {
     private var maxLineColumn = 5
-    private var maxHeight: Int = 0
     private val childPositions = mutableMapOf<View, ChildPosition>()
 
     private class ChildPosition(val view: View) {
@@ -32,10 +31,6 @@ class TagLayout @JvmOverloads constructor(
         var bottom = 0
         override fun toString(): String =
                 "ChildPosition(view=${if (view is TextView) view.text else view}, left=$left, right=$right, top=$top, bottom=$bottom)"
-    }
-
-    init {
-        maxHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, resources.displayMetrics).toInt()
     }
 
     override fun onFinishInflate() {
@@ -49,10 +44,10 @@ class TagLayout @JvmOverloads constructor(
         val width = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
         val height = MeasureSpec.getSize(heightMeasureSpec) - paddingTop - paddingBottom
 
-        //单行累积总宽，即最宽元素的宽
+        //单行累积总宽
         var usedWidth = 0
-        //单行累积总高，即最高元素的高
-        var usedHeight = 0
+        //单行最高元素的高
+        var lineMaxHeight = 0
         //容器整体宽度
         var containerWidth = 0
         var containerHeight = 0
@@ -60,7 +55,7 @@ class TagLayout @JvmOverloads constructor(
         var row = 0
         var col = 0
 
-        fun hasEnoughSpace(childWidth: Int): Boolean = width - usedWidth >= childWidth
+        fun hasEnoughWidth(childWidth: Int): Boolean = width - usedWidth >= childWidth
 
         fun setDisplaySize(cp: ChildPosition, child: View, layoutParams: MarginLayoutParams, startX: Int, startY: Int) {
             cp.left = startX + layoutParams.leftMargin
@@ -73,11 +68,14 @@ class TagLayout @JvmOverloads constructor(
             val child = getChildAt(i)
             if (child.visibility == View.GONE) continue
             val lp = child.layoutParams as MarginLayoutParams
-            //假设父布局有足够的空间让子view放置
             if (child.layoutParams.width == 0) {
+                //match left space的情况
                 child.layoutParams.width = width - usedWidth - lp.leftMargin - lp.rightMargin
                 measureChildWithMargins(child, widthMeasureSpec, usedWidth, heightMeasureSpec, 0)
-            } else measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0)
+            } else {
+                //假设父布局有足够的空间让子view放置
+                measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, lineTop)
+            }
             val childTotalWidth = child.measuredWidth + lp.leftMargin + lp.rightMargin
             val childTotalHeight = child.measuredHeight + lp.topMargin + lp.bottomMargin
 
@@ -87,45 +85,57 @@ class TagLayout @JvmOverloads constructor(
                 childPositions.put(child, cp)
             }
 
-            if (hasEnoughSpace(childTotalWidth) && col < maxLineColumn) {
+            if (hasEnoughWidth(childTotalWidth) && col < maxLineColumn) {
                 setDisplaySize(cp, child, lp, usedWidth, lineTop)
 
                 usedWidth += childTotalWidth
                 col++
-                if (childTotalHeight > usedHeight) usedHeight = childTotalHeight
+                if (childTotalHeight > lineMaxHeight) lineMaxHeight = childTotalHeight
                 if (usedWidth > containerWidth) containerWidth = usedWidth
             } else {
                 col = 0
                 row++
                 usedWidth = 0
-                containerHeight += usedHeight
+                containerHeight += lineMaxHeight
                 lineTop = containerHeight
 
                 setDisplaySize(cp, child, lp, usedWidth, lineTop)
 
                 usedWidth = childTotalWidth
-                usedHeight = childTotalHeight
+                lineMaxHeight = child.measuredHeight + lp.topMargin + lp.bottomMargin
                 println("next line")
             }
-            println("usedWidth=$usedWidth, usedHeight=$usedHeight")
-
-            println("c=$cp")
+            println("usedWidth=$usedWidth, lineMaxHeight=$lineMaxHeight, ctnH=$containerHeight, c=$cp")
         }
-        containerHeight += usedHeight
+        containerHeight += lineMaxHeight
 
         val wMode = MeasureSpec.getMode(widthMeasureSpec)
         val hMode = MeasureSpec.getMode(heightMeasureSpec)
 
         var finalWidth = width
-        var finalHeight = height
         if (layoutParams.width != LayoutParams.MATCH_PARENT) {
             finalWidth = containerWidth
         }
-        if (layoutParams.height != LayoutParams.MATCH_PARENT) {
-            finalHeight = containerHeight
+        val myLp = layoutParams as MarginLayoutParams
+        //判断该类的父容器期望的高
+        val finalHeight = when (MeasureSpec.getMode(height)) {
+            MeasureSpec.EXACTLY -> when {
+                myLp.height >= 0 -> myLp.height
+                myLp.height == LayoutParams.MATCH_PARENT -> height
+                else -> minOf(height, containerHeight)
+            }
+            else -> {
+                when {
+                    myLp.height >= 0 -> myLp.height
+                    myLp.height == LayoutParams.MATCH_PARENT -> minOf(height, containerHeight)
+                    else -> minOf(height, containerHeight)
+                }
+            }
         }
+//TODO 17.9.21 如果height 小于containerHeight，即该类可使用的最大高小于该类的子类所需要的高，那应该通知子类做调整
+        //FIXME 最后一个元素的matchParent在linearLayout无效，measureChildWithMargins得出的值是wrap content的值
         setMeasuredDimension(finalWidth, finalHeight)
-        println("end measure w=$width, h=$height, wm=${Utils.toMeasureModeName(wMode)}, hm=${Utils.toMeasureModeName(hMode)}")
+        println("end measure lpw=${myLp.width} lph=${myLp.height} maxH=$height ctnH=$containerHeight w=$width, h=$height, wm=${Utils.toMeasureModeName(wMode)}, hm=${Utils.toMeasureModeName(hMode)}")
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -197,7 +207,7 @@ class LogTextView @JvmOverloads constructor(
         val wm = MeasureSpec.getMode(widthMeasureSpec)
         val h = MeasureSpec.getSize(heightMeasureSpec)
         val hm = MeasureSpec.getMode(heightMeasureSpec)
-        println("w=$w wm=${Utils.toMeasureModeName(wm)} h=$h hm=${Utils.toMeasureModeName(hm)}")
+        println("logTextView w=$w wm=${Utils.toMeasureModeName(wm)} h=$h hm=${Utils.toMeasureModeName(hm)} lpw=${layoutParams.width} lph=${layoutParams.height}")
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 }
