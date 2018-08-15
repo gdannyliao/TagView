@@ -4,7 +4,10 @@ import android.content.Context
 import android.support.v7.widget.AppCompatTextView
 import android.util.AttributeSet
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.TextView
 
 /**
@@ -108,7 +111,7 @@ class TagLayout @JvmOverloads constructor(
                 usedWidth = childTotalWidth
                 lineMaxHeight = child.measuredHeight + lp.topMargin + lp.bottomMargin
 
-                col = 0
+                col = 1
                 row++
                 if (PRINT_LOG)
                     println("next line")
@@ -122,7 +125,7 @@ class TagLayout @JvmOverloads constructor(
         val hMode = MeasureSpec.getMode(heightMeasureSpec)
 
         var finalWidth = width
-        if (layoutParams.width != LayoutParams.MATCH_PARENT) {
+        if (layoutParams.width != MATCH_PARENT) {
             finalWidth = containerWidth
         }
         val myLp = layoutParams
@@ -130,14 +133,14 @@ class TagLayout @JvmOverloads constructor(
         val finalHeight = when (hMode) {
             MeasureSpec.EXACTLY -> when {
                 myLp.height >= 0 -> myLp.height
-                myLp.height == LayoutParams.MATCH_PARENT -> height
+                myLp.height == MATCH_PARENT -> height
                 else -> minOf(height, containerHeight)
             }
             MeasureSpec.UNSPECIFIED -> containerHeight
             MeasureSpec.AT_MOST -> {
                 when {
                     myLp.height >= 0 -> myLp.height
-                    myLp.height == LayoutParams.MATCH_PARENT -> minOf(height, containerHeight)
+                    myLp.height == MATCH_PARENT -> minOf(height, containerHeight)
                     else -> minOf(height, containerHeight)
                 }
             }
@@ -162,7 +165,7 @@ class TagLayout @JvmOverloads constructor(
     }
 
     override fun generateDefaultLayoutParams(): LayoutParams =
-            MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+            MarginLayoutParams(WRAP_CONTENT, WRAP_CONTENT)
 
     override fun generateLayoutParams(attrs: AttributeSet?): LayoutParams =
             MarginLayoutParams(context, attrs)
@@ -173,7 +176,7 @@ class TagLayout @JvmOverloads constructor(
     fun setTags(tags: List<Any>) {
         for (t in tags) {
             val textView = AppCompatTextView(context)
-            val lp = ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            val lp = MarginLayoutParams(WRAP_CONTENT, WRAP_CONTENT)
             lp.setMargins(4, 4, 4, 4)
             textView.layoutParams = lp
             textView.text = t.toString()
