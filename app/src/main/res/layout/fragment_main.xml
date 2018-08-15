@@ -50,7 +50,7 @@
 			android:text="超出最大列数"
 			android:background="#aa3393FF"
 			/>
-		<view.sxdxz.liao.xingyu.view.LogTextView
+		<TextView
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="matchParent"
@@ -88,7 +88,7 @@
 			android:text="match left space"
 			android:background="#aa7de285"
 			/>
-		<view.sxdxz.liao.xingyu.view.LogTextView
+		<TextView
 			android:layout_width="match_parent"
 			android:layout_height="100dp"
 			android:text="matchParent"
