@@ -16,76 +16,78 @@
 		>
 		<TextView
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="wrapContent"
+			android:layout_height="80dp"
+			android:text="容器1 第一行"
 			android:background="#aaFF338B"
 			/>
 		<TextView
-			android:layout_width="120dp"
-			android:layout_height="120dp"
+			android:layout_width="40dp"
+			android:layout_height="80dp"
 			android:background="#aa7DE285"
-			android:text="fix size"
+			android:text="fix size 40dp"
 			/>
 		<TextView
-			android:layout_width="wrap_content"
+			android:layout_width="80dp"
 			android:layout_height="80dp"
 			android:background="#aaff338b"
-			android:text="fix size2"
+			android:text="fix size 80dp"
 			/>
 		<TextView
-			android:layout_width="20dp"
-			android:layout_height="60dp"
-			android:text="fix size3"
+			android:layout_width="40dp"
+			android:layout_height="90dp"
+			android:text="40dp 最高"
 			android:background="#aa7de285"
 			/>
 		<TextView
 			android:layout_width="30dp"
-			android:layout_height="wrap_content"
+			android:layout_height="80dp"
 			android:text="fifth"
 			android:background="#aaFF338B"
 			/>
 		<TextView
-			android:layout_width="14dp"
+			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="超出最大列数"
+			android:text="容器1 第二行，超出最大列数"
 			android:background="#aa3393FF"
 			/>
-		<TextView
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:text="matchParent"
-			android:background="#aa3393FF"
-			/>
+		<!--TODO 下面这个match parent有问题，并没有match parent-->
+		<!--<TextView-->
+			<!--android:layout_width="match_parent"-->
+			<!--android:layout_height="wrap_content"-->
+			<!--android:text="matchParent"-->
+			<!--android:background="#aaFF338B"-->
+			<!--/>-->
 	</view.sxdxz.liao.xingyu.view.TagLayout>
 
 	<view.sxdxz.liao.xingyu.view.TagLayout
 		android:layout_width="match_parent"
+		android:layout_marginTop="32dp"
 		android:layout_height="150dp"
 		>
 		<TextView
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="wrapContent"
+			android:layout_height="88dp"
+			android:text="容器2 第一行"
 			android:background="#aaFF338B"
 			/>
 		<TextView
 			android:layout_width="120dp"
-			android:layout_height="120dp"
+			android:layout_height="80dp"
 			android:background="#aa7DE285"
-			android:text="fixSizeWzMargin"
+			android:text="120dp 8dp 外边距"
 			android:layout_margin="8dp"
 			/>
 		<TextView
-			android:layout_width="wrap_content"
+			android:layout_width="60dp"
 			android:layout_height="80dp"
 			android:background="#aaff338b"
-			android:text="fixSizeWzMargin"
+			android:text="60dp 8dp 外边距"
 			android:layout_margin="8dp"
 			/>
 		<TextView
 			android:layout_width="0dp"
-			android:layout_height="60dp"
-			android:text="match left space"
+			android:layout_height="88dp"
+			android:text="填满右边"
 			android:background="#aa7de285"
 			/>
 		<TextView

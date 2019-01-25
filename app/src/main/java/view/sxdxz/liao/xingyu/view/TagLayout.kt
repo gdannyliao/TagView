@@ -11,14 +11,15 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.TextView
 
 /**
- *  TagView是一个布局。它的孩子会随着添加顺序从左到右，从上到下依次排列。它的排列方式遵循以下原则
+ *  TagLayout是一个布局。它的孩子会随着添加顺序从左到右，从上到下依次排列。它的排列方式遵循以下原则
  *  1.当横向的空间足够放入一个孩子时，这个孩子总是会排在现有的孩子右边
- *  2.当横向的空间不足以放入一个孩子时，这个孩子会在下一行排列
+ *  2.当横向的空间不足以放入一个孩子，或达到最大列数时，这个孩子会在下一行排列
  *  3.每行的行高取决于这一行里面最高的孩子
  *  4.当布局的宽度为wrap_content时，每行的长度等于这一行所有孩子的宽度的和
  *
- *  可以使用@param setLineMaxColumn() 来设置一行最多有多少列。默认最多5列
+ *  可以使用[maxLineColumn] 来设置一行最多有多少列。默认最多5列
  *  当一个元素是改行最后的元素时，可以使用0dp来设置该元素占用剩余空间
+ *
  * Created by liaoxingyu on 8/27/15.
  */
 class TagLayout @JvmOverloads constructor(
@@ -146,8 +147,9 @@ class TagLayout @JvmOverloads constructor(
             }
             else -> minOf(height, containerHeight)
         }
-//TODO 17.9.21 如果height 小于containerHeight，即该类可使用的最大高小于该类的子类所需要的高，那应该通知子类做调整
+        //TODO 17.9.21 如果height 小于containerHeight，即该类可使用的最大高小于该类的子类所需要的高，那应该通知子类做调整
         //FIXME 最后一个元素的matchParent在linearLayout无效，measureChildWithMargins得出的值是wrap content的值
+        // TODO: 1/24/2019 textview中加入\n后，右边0DP的view会消失
         setMeasuredDimension(finalWidth, finalHeight)
         if (PRINT_LOG)
             println("end measure lpw=${myLp.width} lph=${myLp.height} maxH=$height ctnH=$containerHeight w=$width, h=$height, wm=${Utils.toMeasureModeName(wMode)}, hm=${Utils.toMeasureModeName(hMode)}")
